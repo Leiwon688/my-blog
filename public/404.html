@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirect...</title>
+  <script>
+    var path = window.location.pathname;
+    var base = '/my-blog/';
+    if (!path.startsWith(base)) path = base;
+    window.location.href = base + '?from404=' + encodeURIComponent(path);
+  </script>
+</head>
+<body>
+</body>
+</html>
