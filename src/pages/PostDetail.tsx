@@ -9,12 +9,25 @@ export default function PostDetail() {
   const navigate = useNavigate();
   const [post, setPost] = useState<Post | undefined>(undefined);
   const [posts, setAllPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const all = getPosts();
-    setAllPosts(all);
-    setPost(getPostBySlug(slug || ''));
+    async function load() {
+      const [all, p] = await Promise.all([getPosts(), getPostBySlug(slug || '')]);
+      setAllPosts(all);
+      setPost(p);
+      setLoading(false);
+    }
+    load();
   }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-20 text-center">
+        <p className="text-zinc-400">加载中...</p>
+      </div>
+    );
+  }
 
   if (!post) {
     return (
@@ -65,14 +78,6 @@ export default function PostDetail() {
           <span>{post.date}</span>
           <span>·</span>
           <span>约 {post.readTime} 分钟阅读</span>
-          <span className="ml-auto">
-            <Link
-              to={`/admin/posts/edit/${post.id}`}
-              className="text-zinc-400 hover:text-zinc-700 transition-colors text-xs border border-zinc-200 px-2 py-1 rounded-md cursor-pointer"
-            >
-              编辑
-            </Link>
-          </span>
         </div>
       </header>
 

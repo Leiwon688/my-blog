@@ -8,9 +8,19 @@ export default function SearchBox() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Post[]>([]);
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // 预加载文章数据
+  useEffect(() => {
+    async function load() {
+      const posts = await getPosts();
+      setAllPosts(posts);
+    }
+    load();
+  }, []);
 
   // 打开时自动聚焦
   useEffect(() => {
@@ -57,8 +67,7 @@ export default function SearchBox() {
       return;
     }
     const kw = val.toLowerCase();
-    const posts = getPosts();
-    const matched = posts.filter(p =>
+    const matched = allPosts.filter(p =>
       p.title.toLowerCase().includes(kw) ||
       p.excerpt.toLowerCase().includes(kw) ||
       p.tags.some(t => t.toLowerCase().includes(kw)) ||

@@ -7,11 +7,25 @@ export default function Tags() {
   const { tag } = useParams<{ tag?: string }>();
   const [allTags, setAllTags] = useState<string[]>([]);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setAllTags(getTags());
-    setAllPosts(getPosts());
+    async function load() {
+      const [t, p] = await Promise.all([getTags(), getPosts()]);
+      setAllTags(t);
+      setAllPosts(p);
+      setLoading(false);
+    }
+    load();
   }, [tag]);
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 text-center">
+        <p className="text-zinc-400">加载中...</p>
+      </div>
+    );
+  }
 
   // 如果有 tag 参数，显示该标签的文章列表
   if (tag) {

@@ -7,18 +7,43 @@ export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [activeTag, setActiveTag] = useState<string>('全部');
-  const [profile, setProfile] = useState<SiteProfile>(getProfile());
+  const [profile, setProfile] = useState<SiteProfile>({
+    heroName: '',
+    heroBio: '',
+    siteTitle: '',
+    aboutName: '',
+    aboutSubtitle: '',
+    aboutParagraphs: [],
+    skills: [],
+    socialLinks: [],
+    email: '',
+    footerText: ''
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setPosts(getPosts());
-    setAllTags(getTags());
-    setProfile(getProfile());
+    async function load() {
+      const [p, t, pf] = await Promise.all([getPosts(), getTags(), getProfile()]);
+      setPosts(p);
+      setAllTags(t);
+      setProfile(pf);
+      setLoading(false);
+    }
+    load();
   }, []);
 
   const displayTags = ['全部', ...allTags];
   const filteredPosts = activeTag === '全部'
     ? posts
     : posts.filter(post => post.tags.includes(activeTag));
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 text-center">
+        <p className="text-zinc-400">加载中...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">

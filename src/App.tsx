@@ -27,9 +27,12 @@ function Footer() {
   const [siteTitle, setSiteTitle] = useState("Leo's Blog");
 
   useEffect(() => {
-    const p = getProfile();
-    setFooterText(p.footerText);
-    setSiteTitle(p.siteTitle);
+    async function load() {
+      const p = await getProfile();
+      setFooterText(p.footerText);
+      setSiteTitle(p.siteTitle);
+    }
+    load();
   }, []);
 
   return (

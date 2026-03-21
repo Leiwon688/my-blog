@@ -24,7 +24,11 @@ export default function Navbar() {
   const isLogin = pathname === '/admin/login';
 
   useEffect(() => {
-    setSiteTitle(getProfile().siteTitle);
+    async function load() {
+      const p = await getProfile();
+      setSiteTitle(p.siteTitle);
+    }
+    load();
   }, [pathname]);
 
   const handleLogout = () => {

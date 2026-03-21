@@ -32,11 +32,27 @@ function SocialIcon({ type }: { type: SocialLink['type'] }) {
 }
 
 export default function About() {
-  const [profile, setProfile] = useState<SiteProfile>(getProfile());
+  const [profile, setProfile] = useState<SiteProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setProfile(getProfile());
+    async function load() {
+      const p = await getProfile();
+      setProfile(p);
+      setLoading(false);
+    }
+    load();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 text-center">
+        <p className="text-zinc-400">加载中...</p>
+      </div>
+    );
+  }
+
+  if (!profile) return null;
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
