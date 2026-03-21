@@ -23,9 +23,9 @@ export function PostList() {
     p.tags.some((t: string) => t.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const updated = posts.filter(p => p.id !== id);
-    savePostsForAdmin(updated);
+    await savePostsForAdmin(updated);
     refresh();
     setDeleteId(null);
   };
@@ -236,18 +236,18 @@ export function PostEditor() {
     setSaving(true);
 
     const posts = await getPostsForAdmin();
-    
+
     if (isEdit && id) {
       // 更新
       const updated = posts.map(p => p.id === id ? { ...p, ...form } : p);
-      savePostsForAdmin(updated);
+      await savePostsForAdmin(updated);
     } else {
       // 新建
       const newPost: Post = {
         ...form,
         id: Date.now().toString(),
       };
-      savePostsForAdmin([newPost, ...posts]);
+      await savePostsForAdmin([newPost, ...posts]);
     }
 
     setSaving(false);

@@ -1,8 +1,25 @@
 /**
  * 博客数据存储
- * - 数据从 /data.json 加载（静态文件方式部署到 GitHub Pages）
- * - 所有浏览器访问同一份数据，换浏览器不会丢失
+ * - 生产环境：优先从云数据库获取（腾讯云开发 CloudBase）
+ * - 开发环境：使用本地 data.json
+ * - 写操作会同步到云端
  */
+
+// ============ 云数据库配置 ============
+import {
+  getPostsFromCloud,
+  savePostToCloud,
+  deletePostFromCloud,
+  getTagsFromCloud,
+  saveTagsToCloud,
+  syncPostsToCloud,
+  getProfileFromCloud,
+  saveProfileToCloud,
+  ensureCloudbaseReady
+} from '../lib/cloudbase';
+
+// 是否启用云端同步（仅在生产环境启用）
+const USE_CLOUD = import.meta.env.PROD;
 
 // ============ 类型定义 ============
 
@@ -50,23 +67,7 @@ interface DataFile {
 }
 
 let cachedData: DataFile | null = null;
-
-async function loadData(): Promise<DataFile> {
-  if (cachedData) return cachedData;
-  
-  try {
-    const res = await fetch('/data.json');
-    cachedData = await res.json();
-    return cachedData!;
-  } catch (e) {
-    console.error('Failed to load data:', e);
-    return { 
-      profile: getDefaultProfile(), 
-      tags: [], 
-      posts: [] 
-    };
-  }
-}
+let cloudDataLoaded = false;
 
 function getDefaultProfile(): SiteProfile {
   return {
@@ -83,37 +84,125 @@ function getDefaultProfile(): SiteProfile {
   };
 }
 
-// ============ 导出函数（只读，发布到 GitHub 后手动编辑 data.json）============
+// 尝试从云端加载数据
+async function loadCloudData(): Promise<{ posts: Post[], tags: string[], profile: SiteProfile } | null> {
+  if (!USE_CLOUD) return null;
 
-// 文章（只读）
+  const ready = await ensureCloudbaseReady();
+  if (!ready) {
+    console.warn('CloudBase not ready, falling back to local data');
+    return null;
+  }
+
+  try {
+    const [posts, tags, cloudProfile] = await Promise.all([
+      getPostsFromCloud(),
+      getTagsFromCloud(),
+      getProfileFromCloud()
+    ]);
+    if (posts.length > 0 || cloudProfile) {
+      return {
+        posts,
+        tags,
+        profile: cloudProfile || getDefaultProfile()
+      };
+    }
+  } catch (e) {
+    console.error('Failed to load from cloud:', e);
+  }
+  return null;
+}
+
+async function loadData(): Promise<DataFile> {
+  if (cachedData) return cachedData;
+
+  // 优先尝试从云端加载
+  if (!cloudDataLoaded) {
+    const cloudData = await loadCloudData();
+    if (cloudData) {
+      cachedData = {
+        profile: cloudData.profile,
+        tags: cloudData.tags,
+        posts: cloudData.posts
+      };
+      cloudDataLoaded = true;
+      return cachedData!;
+    }
+    cloudDataLoaded = true;
+  }
+
+  // 降级到本地 JSON
+  try {
+    const res = await fetch('/data.json');
+    cachedData = await res.json();
+    return cachedData!;
+  } catch (e) {
+    console.error('Failed to load data:', e);
+    return {
+      profile: getDefaultProfile(),
+      tags: [],
+      posts: []
+    };
+  }
+}
+
+// ============ 导出函数（前台使用，优先从云端获取最新数据）============
+
 export async function getPosts(): Promise<Post[]> {
+  if (USE_CLOUD) {
+    try {
+      await ensureCloudbaseReady();
+      const posts = await getPostsFromCloud();
+      if (posts.length > 0) {
+        return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      }
+    } catch (e) {
+      console.warn('Failed to get posts from cloud:', e);
+    }
+  }
   const data = await loadData();
   return data.posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
-  const data = await loadData();
-  return data.posts.find(p => p.slug === slug);
+  const posts = await getPosts();
+  return posts.find(p => p.slug === slug);
 }
 
 export async function getPostById(id: string): Promise<Post | undefined> {
-  const data = await loadData();
-  return data.posts.find(p => p.id === id);
+  const posts = await getPosts();
+  return posts.find(p => p.id === id);
 }
 
-// 标签（只读）
 export async function getTags(): Promise<string[]> {
+  if (USE_CLOUD) {
+    try {
+      await ensureCloudbaseReady();
+      const tags = await getTagsFromCloud();
+      if (tags.length > 0) return tags;
+    } catch (e) {
+      console.warn('Failed to get tags from cloud:', e);
+    }
+  }
   const data = await loadData();
   return data.tags;
 }
 
 export async function getPostsByTag(tag: string): Promise<Post[]> {
-  const data = await loadData();
-  return data.posts.filter(p => p.tags.includes(tag));
+  const posts = await getPosts();
+  return posts.filter(p => p.tags.includes(tag));
 }
 
-// 个人资料（只读）
 export async function getProfile(): Promise<SiteProfile> {
+  if (USE_CLOUD) {
+    try {
+      await ensureCloudbaseReady();
+      const cloudProfile = await getProfileFromCloud();
+      if (cloudProfile) return cloudProfile;
+    } catch (e) {
+      console.warn('Failed to get profile from cloud:', e);
+    }
+  }
   const data = await loadData();
   return data.profile;
 }
@@ -128,27 +217,21 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-// ============ 后台管理函数（更新 localStorage，用于预览）============
+// ============ 后台管理函数（更新 localStorage + 云端）============
 
-// localStorage 键
 const PREVIEW_POSTS_KEY = 'leo_blog_posts_preview';
 const PREVIEW_TAGS_KEY = 'leo_blog_tags_preview';
 const PREVIEW_PROFILE_KEY = 'leo_blog_profile_preview';
 
-// 获取预览数据（优先使用 localStorage，否则用 JSON）
 export async function getPostsForAdmin(): Promise<Post[]> {
   const preview = localStorage.getItem(PREVIEW_POSTS_KEY);
-  if (preview) {
-    return JSON.parse(preview);
-  }
+  if (preview) return JSON.parse(preview);
   return getPosts();
 }
 
 export async function getTagsForAdmin(): Promise<string[]> {
   const preview = localStorage.getItem(PREVIEW_TAGS_KEY);
-  if (preview) {
-    return JSON.parse(preview);
-  }
+  if (preview) return JSON.parse(preview);
   return getTags();
 }
 
@@ -158,15 +241,27 @@ export function getProfileFromStorage(): SiteProfile | null {
   return null;
 }
 
-export function saveProfileToStorage(profile: SiteProfile) {
+export async function saveProfileToStorage(profile: SiteProfile): Promise<void> {
   localStorage.setItem(PREVIEW_PROFILE_KEY, JSON.stringify(profile));
+  if (USE_CLOUD) await saveProfileToCloud(profile);
 }
 
-// 保存到 localStorage 预览
-export function savePostsForAdmin(posts: Post[]): void {
+export async function savePostsForAdmin(posts: Post[]): Promise<void> {
   localStorage.setItem(PREVIEW_POSTS_KEY, JSON.stringify(posts));
+  if (USE_CLOUD) await syncPostsToCloud(posts);
 }
 
-export function saveTagsForAdmin(tags: string[]): void {
+export async function saveTagsForAdmin(tags: string[]): Promise<void> {
   localStorage.setItem(PREVIEW_TAGS_KEY, JSON.stringify(tags));
+  if (USE_CLOUD) await saveTagsToCloud(tags);
+}
+
+export async function savePostToCloudRealtime(post: Post): Promise<boolean> {
+  if (!USE_CLOUD) return false;
+  return savePostToCloud(post as any);
+}
+
+export async function deletePostRealtime(id: string): Promise<boolean> {
+  if (!USE_CLOUD) return false;
+  return deletePostFromCloud(id);
 }

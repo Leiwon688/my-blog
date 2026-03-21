@@ -1,18 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getProfile, type SiteProfile } from '../../data/store';
-
-const PREVIEW_PROFILE_KEY = 'leo_blog_profile_preview';
-
-// localStorage 存储预览
-function getProfileFromStorage(): SiteProfile | null {
-  const stored = localStorage.getItem(PREVIEW_PROFILE_KEY);
-  if (stored) return JSON.parse(stored);
-  return null;
-}
-
-function saveProfileToStorage(profile: SiteProfile) {
-  localStorage.setItem(PREVIEW_PROFILE_KEY, JSON.stringify(profile));
-}
+import { getProfile, getProfileFromStorage, saveProfileToStorage, type SiteProfile } from '../../data/store';
 
 export default function ProfileAdmin() {
   const [profile, setProfile] = useState<SiteProfile | null>(null);
@@ -39,9 +26,9 @@ export default function ProfileAdmin() {
     setSaved(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!profile) return;
-    saveProfileToStorage(profile);
+    await saveProfileToStorage(profile);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };

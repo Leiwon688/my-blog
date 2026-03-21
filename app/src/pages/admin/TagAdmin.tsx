@@ -17,49 +17,49 @@ export default function TagAdmin() {
   };
   useEffect(() => { refresh(); }, []);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const t = newTag.trim();
     if (!t) return;
     if (tags.includes(t)) { setError('标签已存在'); return; }
     const updated = [...tags, t];
-    saveTagsForAdmin(updated);
+    await saveTagsForAdmin(updated);
     setNewTag('');
     setError('');
     refresh();
   };
 
-  const handleRename = (old: string) => {
+  const handleRename = async (old: string) => {
     const t = editValue.trim();
     if (!t) return;
     if (t !== old && tags.includes(t)) { setError('标签名已存在'); return; }
-    
+
     // 更新标签
     const updatedTags = tags.map(tag => tag === old ? t : tag);
-    saveTagsForAdmin(updatedTags);
-    
+    await saveTagsForAdmin(updatedTags);
+
     // 更新所有文章的标签
     const updatedPosts = posts.map(post => ({
       ...post,
       tags: post.tags.map((tag: string) => tag === old ? t : tag)
     }));
-    savePostsForAdmin(updatedPosts);
-    
+    await savePostsForAdmin(updatedPosts);
+
     setEditingTag(null);
     refresh();
   };
 
-  const handleDelete = (tag: string) => {
+  const handleDelete = async (tag: string) => {
     // 从标签列表中移除
     const updatedTags = tags.filter(t => t !== tag);
-    saveTagsForAdmin(updatedTags);
-    
+    await saveTagsForAdmin(updatedTags);
+
     // 从所有文章中移除该标签
     const updatedPosts = posts.map(post => ({
       ...post,
       tags: post.tags.filter((t: string) => t !== tag)
     }));
-    savePostsForAdmin(updatedPosts);
-    
+    await savePostsForAdmin(updatedPosts);
+
     setDeleteTarget(null);
     refresh();
   };
