@@ -24,10 +24,7 @@ export function PostList() {
   );
 
   const handleDelete = async (id: string) => {
-    console.log('[PostAdmin] 删除文章, id:', id);
-    console.log('[PostAdmin] 当前文章列表:', posts.map(p => p.id + ':' + p.title));
     const updated = posts.filter(p => p.id !== id);
-    console.log('[PostAdmin] 删除后文章列表:', updated.map(p => p.id + ':' + p.title));
     await savePostsForAdmin(updated);
     refresh();
     setDeleteId(null);
@@ -239,24 +236,17 @@ export function PostEditor() {
     setSaving(true);
 
     const posts = await getPostsForAdmin();
-    console.log('[PostAdmin] 当前文章数:', posts.length);
-    console.log('[PostAdmin] 是否编辑模式:', isEdit, 'id:', id);
 
     if (isEdit && id) {
       // 更新
-      console.log('[PostAdmin] 更新文章, 匹配 id:', id);
       const updated = posts.map(p => p.id === id ? { ...p, ...form } : p);
-      console.log('[PostAdmin] 更新后文章数:', updated.length);
       await savePostsForAdmin(updated);
     } else {
       // 新建
-      const newId = Date.now().toString();
-      console.log('[PostAdmin] 新建文章, 生成 id:', newId);
       const newPost: Post = {
         ...form,
-        id: newId,
+        id: Date.now().toString(),
       };
-      console.log('[PostAdmin] 保存文章列表:', [newPost, ...posts].map(p => p.id + ':' + p.title));
       await savePostsForAdmin([newPost, ...posts]);
     }
 

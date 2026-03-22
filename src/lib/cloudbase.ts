@@ -103,33 +103,23 @@ export async function deletePostFromCloud(id: string): Promise<boolean> {
 
 export async function syncPostsToCloud(posts: CloudPost[]): Promise<boolean> {
   try {
-    console.log('[CloudBase sync] 开始同步', posts.length, '篇文章');
-    
     // 获取云端现有文章
     const existing = await db.collection(POSTS_COLLECTION).get();
-    const existingIds = existing.data.map(p => p.id);
-    console.log('[CloudBase sync] 云端现有文章:', existing.data.length, '篇');
-    console.log('[CloudBase sync] 云端文章ID列表:', existingIds);
-    
     const targetIds = posts.map(p => p.id);
     
     // 找出需要删除的文章（云端有，但目标列表没有的）
     const toDelete = existing.data.filter(p => !targetIds.includes(p.id));
-    console.log('[CloudBase sync] 需要删除的文章:', toDelete.map(p => p.id + ':' + p.title));
     
     // 对每篇文章使用 upsert 逻辑（存在则更新，不存在则新增）
     for (const post of posts) {
       const exist = await db.collection(POSTS_COLLECTION).where({ id: post.id }).get();
-      console.log('[CloudBase sync] 查询文章', post.id, '存在?:', exist.data?.length > 0);
       
       if (exist.data && exist.data.length > 0) {
-        console.log('[CloudBase sync] 更新文章:', post.id, post.title);
         await db.collection(POSTS_COLLECTION).where({ id: post.id }).update({
           ...post,
           updatedAt: Date.now(),
         });
       } else {
-        console.log('[CloudBase sync] 新增文章:', post.id, post.title);
         await db.collection(POSTS_COLLECTION).add({
           ...post,
           createdAt: Date.now(),
@@ -140,18 +130,12 @@ export async function syncPostsToCloud(posts: CloudPost[]): Promise<boolean> {
     
     // 删除多余的文章
     for (const doc of toDelete) {
-      console.log('[CloudBase sync] 删除文章 _id:', doc._id, 'id:', doc.id);
       await db.collection(POSTS_COLLECTION).doc(doc._id).remove();
     }
     
-    // 验证结果
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const verify = await db.collection(POSTS_COLLECTION).get();
-    console.log('[CloudBase sync] 验证云端文章数:', verify.data.length);
-    
     return true;
-  } catch (e: any) {
-    console.error('[CloudBase sync] 失败:', e?.message || e);
+  } catch (e) {
+    console.error('Failed to sync posts to cloud:', e);
     return false;
   }
 }
@@ -174,27 +158,22 @@ export async function getTagsFromCloud(): Promise<string[]> {
 export async function saveTagsToCloud(tags: string[]): Promise<boolean> {
   try {
     const exist = await db.collection(TAGS_COLLECTION).get();
-    console.log('[CloudBase] 标签集合存在检查:', exist.data?.length, '条记录');
     
     if (exist.data && exist.data.length > 0) {
-      console.log('[CloudBase] 更新标签文档, _id:', exist.data[0]._id);
-      const updateResult = await db.collection(TAGS_COLLECTION).where({ _id: exist.data[0]._id }).update({
+      await db.collection(TAGS_COLLECTION).where({ _id: exist.data[0]._id }).update({
         tags,
         updatedAt: Date.now(),
       });
-      console.log('[CloudBase] 更新结果:', JSON.stringify(updateResult));
     } else {
-      console.log('[CloudBase] 创建新标签文档');
-      const addResult = await db.collection(TAGS_COLLECTION).add({
+      await db.collection(TAGS_COLLECTION).add({
         tags,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
-      console.log('[CloudBase] 新增结果:', JSON.stringify(addResult));
     }
     return true;
-  } catch (e: any) {
-    console.error('[CloudBase] 保存标签失败:', e?.message || e);
+  } catch (e) {
+    console.error('Failed to save tags to cloud:', e);
     return false;
   }
 }
