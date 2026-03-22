@@ -270,15 +270,27 @@ export async function getProfileFromStorage(): Promise<SiteProfile | null> {
 }
 
 export async function saveProfileToStorage(profile: SiteProfile): Promise<void> {
-  if (USE_CLOUD) await saveProfileToCloud(profile);
+  console.log('[Admin] 保存站点设置到云端');
+  if (USE_CLOUD) {
+    const result = await saveProfileToCloud(profile);
+    console.log('[Admin] 站点设置保存结果:', result);
+  }
 }
 
 export async function savePostsForAdmin(posts: Post[]): Promise<void> {
-  if (USE_CLOUD) await syncPostsToCloud(posts);
+  console.log('[Admin] 同步文章到云端:', posts.length, '篇');
+  if (USE_CLOUD) {
+    const result = await syncPostsToCloud(posts);
+    console.log('[Admin] 文章同步结果:', result);
+  }
 }
 
 export async function saveTagsForAdmin(tags: string[]): Promise<void> {
-  if (USE_CLOUD) await saveTagsToCloud(tags);
+  console.log('[Admin] 保存标签到云端:', tags);
+  if (USE_CLOUD) {
+    const result = await saveTagsToCloud(tags);
+    console.log('[Admin] 标签保存结果:', result);
+  }
 }
 
 export async function savePostToCloudRealtime(post: Post): Promise<boolean> {
