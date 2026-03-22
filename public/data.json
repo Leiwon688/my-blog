@@ -6,83 +6,34 @@
     "aboutName": "Leo Wang",
     "aboutSubtitle": "软件工程师 · 开源爱好者 · 终身学习者",
     "aboutParagraphs": [
-      "你好！我是 Leo，一名热爱技术的软件工程师。目前专注于前端工程化、全栈开发和系统架构设计。",
-      "我相信写作是思维的延伸。这个博客是我记录技术探索、分享学习心得的地方。内容涵盖前端开发、后端架构、开发工具和一些碎碎念。",
-      "工作之余，我喜欢为开源项目贡献代码、阅读计算机科学相关书籍，以及折腾各种效率工具。"
+      "你好！我是 Leo。"
     ],
-    "skills": [
-      { "category": "前端", "items": ["React", "TypeScript", "Vue", "Tailwind CSS", "Next.js"] },
-      { "category": "后端", "items": ["Go", "Node.js", "Python", "PostgreSQL", "Redis"] },
-      { "category": "工具", "items": ["Docker", "Git", "Linux", "CI/CD", "Kubernetes"] }
-    ],
-    "socialLinks": [
-      { "label": "GitHub", "href": "https://github.com", "type": "github" },
-      { "label": "RSS", "href": "#", "type": "rss" }
-    ],
-    "email": "leo@example.com",
+    "skills": [],
+    "socialLinks": [],
+    "email": "",
     "footerText": "用代码丈量世界 🌍"
   },
-  "tags": ["React", "前端", "TypeScript", "性能优化", "随想", "成长", "CSS", "后端", "Go"],
+  "tags": [
+    "AI",
+    "DeepSeek",
+    "人工智能",
+    "趋势"
+  ],
   "posts": [
     {
-      "id": "1",
-      "title": "用 React 18 构建高性能 Web 应用",
-      "slug": "react-18-performance",
-      "date": "2026-03-15",
-      "tags": ["React", "前端", "性能优化"],
-      "readTime": 8,
-      "excerpt": "React 18 带来了并发特性、自动批处理、Suspense 改进等重要更新，本文深入探讨如何利用这些新特性打造流畅的用户体验。",
-      "content": "# 用 React 18 构建高性能 Web 应用\n\nReact 18 是 React 历史上最重要的版本之一，引入了**并发渲染（Concurrent Rendering）**这一革命性特性。\n\n## 并发特性\n\n并发模式允许 React 同时准备多个版本的 UI，使应用在处理大量数据时仍能保持响应。\n\n```tsx\nimport { startTransition, useTransition } from 'react';\n\nfunction SearchResults() {\n  const [isPending, startTransition] = useTransition();\n  const [query, setQuery] = useState('');\n  const [results, setResults] = useState([]);\n\n  const handleSearch = (value: string) => {\n    setQuery(value);\n    startTransition(() => {\n      setResults(heavySearch(value));\n    });\n  };\n\n  return (\n    <div>\n      <input onChange={e => handleSearch(e.target.value)} />\n      {isPending ? <Spinner /> : <ResultList data={results} />}\n    </div>\n  );\n}\n```\n\n## 自动批处理\n\nReact 18 中，所有状态更新都会自动批处理，包括在 setTimeout、Promise 和原生事件处理中。\n\n## 总结\n\nReact 18 的并发特性为构建高性能应用提供了强大工具。"
-    },
-    {
-      "id": "2",
-      "title": "TypeScript 类型体操完全指南",
-      "slug": "typescript-type-gymnastics",
-      "date": "2026-03-14",
-      "tags": ["TypeScript", "前端", "后端"],
-      "readTime": 12,
-      "excerpt": "TypeScript 的类型系统是其核心优势所在。本文将带你深入理解高级类型用法，包括条件类型、映射类型、模板字面量类型等。",
-      "content": "# TypeScript 类型体操完全指南\n\nTypeScript 的类型系统是其核心优势所在。\n\n## 条件类型\n\n```ts\ntype IsString<T> = T extends string ? true : false;\ntype A = IsString<string>;  // true\ntype B = IsString<number>;  // false\n```\n\n## 映射类型\n\n```ts\ntype Readonly<T> = {\n  readonly [P in keyof T]: T[P];\n};\n```\n\n## 总结\n\n掌握这些高级类型用法，可以让你的代码更加类型安全。"
-    },
-    {
-      "id": "3",
-      "title": "Tailwind CSS v4 带来的新变化",
-      "slug": "tailwind-v4-whats-new",
-      "date": "2026-03-13",
-      "tags": ["CSS", "前端", "工具"],
+      "id": "ai-trends-2025-03-22",
+      "title": "2025年AI热潮：DeepSeek引领中国人工智能新纪元",
+      "slug": "ai-trends-2025-deepseek",
+      "date": "2025-03-22",
+      "tags": [
+        "AI",
+        "DeepSeek",
+        "人工智能",
+        "趋势"
+      ],
+      "excerpt": "2025年开年，人工智能成为最热门话题。从DeepSeek的爆火到政务系统的全面接入，AI正深刻改变着我们的生活和工作方式。",
       "readTime": 6,
-      "excerpt": "Tailwind CSS v4 引入了全新的引擎，性能大幅提升，同时带来了更简洁的配置方式和强大的新功能。",
-      "content": "# Tailwind CSS v4 带来的新变化\n\nv4 版本带来了全新的引擎架构。\n\n## 性能提升\n\n- 增量编译\n- 更好的缓存\n- 更快的构建速度\n\n## 新功能\n\n使用 CSS 原生特性，不再需要复杂的配置文件。"
-    },
-    {
-      "id": "4",
-      "title": "从零构建 RESTful API：Go 语言实战",
-      "slug": "go-rest-api",
-      "date": "2026-03-12",
-      "tags": ["Go", "后端", "架构"],
-      "readTime": 15,
-      "excerpt": "使用 Go 语言从零构建一个高性能 RESTful API，涵盖路由设计、中间件、数据库集成、认证等核心内容。",
-      "content": "# 从零构建 RESTful API：Go 语言实战\n\nGo 是构建高性能后端服务的理想选择。\n\n## 项目结构\n\n```\n/\n├── main.go\n├── handlers/\n├── models/\n└── middleware/\n```\n\n## 路由设计\n\n使用 Gorilla Mux 或标准库的 HTTP 处理。\n\n## 数据库\n\n集成 PostgreSQL，使用 GORM 或 sqlx。"
-    },
-    {
-      "id": "5",
-      "title": "现代 CSS 布局完全指南",
-      "slug": "modern-css-layout",
-      "date": "2026-03-11",
-      "tags": ["CSS", "前端"],
-      "readTime": 10,
-      "excerpt": "Grid、Flexbox、Subgrid... 带你全面掌握现代 CSS 布局技术，解决各种复杂的排版需求。",
-      "content": "# 现代 CSS 布局完全指南\n\n## Flexbox\n\nFlexbox 是一维布局模型，适合处理行或列。\n\n## Grid\n\nGrid 是二维布局模型，可以同时控制行和列。\n\n## Subgrid\n\nSubgrid 允许子元素继承父网格的轨道定义。"
-    },
-    {
-      "id": "6",
-      "title": "Docker 最佳实践与性能优化",
-      "slug": "docker-best-practices",
-      "date": "2026-03-10",
-      "tags": ["后端", "工具", "DevOps"],
-      "readTime": 11,
-      "excerpt": "Docker 已成为现代开发的标配，本文分享 Dockerfile 编写、多阶段构建、镜像优化等实战技巧。",
-      "content": "# Docker 最佳实践与性能优化\n\n## 多阶段构建\n\n使用多阶段构建可以大幅减小镜像体积。\n\n```dockerfile\nFROM node:18-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:18-alpine\nWORKDIR /app\nCOPY --from=builder /app/dist ./dist\n```\n\n## 最佳实践\n\n- 使用 .dockerignore\n- 最小化层数\n- 使用特定版本的基础镜像"
+      "content": "# 2025年AI热潮：DeepSeek引领中国人工智能新纪元\n\n2025年刚刚过去不到三个月，人工智能已经成为这段时间最热门的话题。从深度求索（DeepSeek）在春节期间的爆火，到各地政务系统的快速接入，AI正以惊人的速度渗透到我们生活的方方面面。\n\n## DeepSeek：国产AI的惊艳亮相\n\n2025年1月20日，国产大模型深度求索（DeepSeek）推出了新一代模型R1，迅速在科技圈引发轰动。\n\n### 三大核心优势\n\n1. **性能卓越**：DeepSeek-R1 性能比肩 OpenAI 的 o1 模型，在多项 benchmark 测试中表现出色\n2. **成本低廉**：训练成本远低于同类国际大模型，让中小企业也能用得起顶级AI\n3. **全面开源**：采用开源策略，推动国内AI生态的快速发展\n\n### 市场表现\n\n- 登顶苹果美区、中国区应用商店免费榜\n- 超越 ChatGPT 成为下载量最高的AI应用\n- 引发全球科技界对国产AI的重新审视\n\n## 政务系统全面拥抱AI\n\nDeepSeek 的火爆不仅停留在消费端，各地政府也迅速行动起来。\n\n### 城市接入时间线\n\n| 城市 | 接入时间 | 特色应用 |\n|------|----------|----------|\n| 广州 | 2025年1月 | 全国首个完成政务领域国产化适配 |\n| 深圳 | 2月16日 | 政务云环境全面提供服务 |\n| 北京 | 2月下旬 | 智能政务服务平台上线 |\n| 南京/苏州/无锡/常州 | 2-3月 | 长三角城市群联动接入 |\n\n### 典型应用场景\n\n- **AI数智员工**（深圳福田区）：公文处理、执法文书生成、招商分析\n- **12345热线智能应答**（广东梅州）：智能填单、工单分类转派\n- **政策智能解读**：自动解析复杂政策文件，生成通俗易懂的解读材料\n\n## 企业抢滩AI人才\n\n随着AI应用的爆发，相关人才成为招聘市场的\"香饽饽\"。\n\n### 招聘市场数据\n\n- **最稀缺岗位**：算法工程师（占比67.17%）\n- **热门职能**：图像算法、机器视觉、深度学习、机器学习\n- **薪资水平**：AI大模型应用研究员月薪最高达4万元（上海地区）\n\n### 企业抢人动态\n\n- **阿里巴巴**：AI To C业务大规模招聘，90%岗位为AI技术、产品研发\n- **小米、字节跳动**：频频争夺顶尖AI人才\n- **宇树科技**：为AI算法工程师开出月薪最高7万元\n\n## 高校扩招培养AI人才\n\n面对AI人才的巨大缺口，高校纷纷行动起来。\n\n### \"双一流\"高校扩招计划\n\n- **清华大学**：扩招约150人，成立本科通识书院，聚焦AI与多学科交叉\n- **上海交通大学**：扩招150人，重点扩大人工智能、集成电路招生\n- **中国农业大学**：扩招500人，聚焦粮食安全、生物智造、人工智能\n\n### 新成立人工智能学院\n\n- **香港中文大学（深圳）**：2月13日成立人工智能学院\n- **广西大学、桂林旅游学院、广州理工学院**：相继揭牌成立人工智能学院\n- **江苏省**：遴选15所高校建设省级人工智能学院（包括南京大学、东南大学等）\n\n## 各地政策真金白银投入\n\n### 主要城市支持政策\n\n**苏州**\n- 对牵头国家AI重大工程主体最高支持1亿元\n- 顶尖人才最高1亿元项目资助 + 1000万元购房补贴\n\n**北京**\n- 设立1000亿元政府投资基金，支持AI、机器人等未来产业\n\n**深圳**\n- 发放\"训力券\"\"语料券\"\"模型券\"\n- 每年最高5亿元降低企业AI应用成本\n\n**广东**\n- 对国家级/省级AI创新中心最高支持5000万/1000万\n- 每年支持不超过10个标杆案例，每个最高800万元奖励\n\n## 展望未来\n\n2025年的AI热潮只是一个开始。随着技术的不断进步和应用场景的持续拓展，人工智能将在更多领域发挥重要作用：\n\n- **智能制造**：提升生产效率，实现个性化定制\n- **智慧医疗**：辅助诊断，加速新药研发\n- **自动驾驶**：从实验室走向大规模商用\n- **教育变革**：个性化学习，智能辅导\n\nAI时代已经来临，你准备好了吗？\n\n---\n\n*本文撰写于2025年3月22日，数据来源于公开报道整理。*\n"
     }
   ]
 }
