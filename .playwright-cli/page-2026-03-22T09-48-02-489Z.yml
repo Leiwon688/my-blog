@@ -1,0 +1,63 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "Leo的博客" [ref=e7] [cursor=pointer]:
+        - /url: "#/"
+      - navigation [ref=e8]:
+        - link "首页" [ref=e9] [cursor=pointer]:
+          - /url: "#/"
+        - link "标签" [ref=e10] [cursor=pointer]:
+          - /url: "#/tags"
+        - link "关于" [ref=e11] [cursor=pointer]:
+          - /url: "#/about"
+        - generic [ref=e12]:
+          - button "搜索" [ref=e13] [cursor=pointer]:
+            - img [ref=e14]
+            - generic [ref=e16]: 搜索
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - img [ref=e57]
+              - textbox "搜索文章…" [active] [ref=e59]
+              - generic [ref=e60]: ESC
+            - generic [ref=e61]: 输入关键词搜索文章
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - heading "你好，我是 Leo 👋" [level=1] [ref=e20]
+        - paragraph [ref=e21]: 记录技术探索与思考，专注于前端开发、系统架构和开发工具。
+      - generic [ref=e23]:
+        - button "全部" [ref=e24] [cursor=pointer]
+        - button "AI" [ref=e25] [cursor=pointer]
+        - button "DeepSeek" [ref=e26] [cursor=pointer]
+        - button "人工智能" [ref=e27] [cursor=pointer]
+        - button "趋势" [ref=e28] [cursor=pointer]
+      - article [ref=e30]:
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - link "AI" [ref=e34] [cursor=pointer]:
+              - /url: "#/tags/AI"
+            - link "DeepSeek" [ref=e35] [cursor=pointer]:
+              - /url: "#/tags/DeepSeek"
+            - link "人工智能" [ref=e36] [cursor=pointer]:
+              - /url: "#/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD"
+            - link "趋势" [ref=e37] [cursor=pointer]:
+              - /url: "#/tags/%E8%B6%8B%E5%8A%BF"
+          - link "2025年AI热潮：DeepSeek引领中国人工智能新纪元 2025年开年，人工智能成为最热门话题。从DeepSeek的爆火到政务系统的全面接入，AI正深刻改变着我们的生活和工作方式。" [ref=e38] [cursor=pointer]:
+            - /url: "#/post/ai-trends-2025-deepseek"
+            - heading "2025年AI热潮：DeepSeek引领中国人工智能新纪元" [level=2] [ref=e39]
+            - paragraph [ref=e40]: 2025年开年，人工智能成为最热门话题。从DeepSeek的爆火到政务系统的全面接入，AI正深刻改变着我们的生活和工作方式。
+        - generic [ref=e41]:
+          - generic [ref=e42]: 2025-03-22
+          - generic [ref=e43]: ·
+          - generic [ref=e44]: 约 6 分钟阅读
+          - link "阅读全文 →" [ref=e46] [cursor=pointer]:
+            - /url: "#/post/ai-trends-2025-deepseek"
+      - generic [ref=e47]:
+        - generic [ref=e48]: 共 1 篇文章
+        - generic [ref=e49]: ·
+        - link "浏览所有标签" [ref=e50] [cursor=pointer]:
+          - /url: "#/tags"
+  - contentinfo [ref=e51]:
+    - generic [ref=e52]:
+      - generic [ref=e53]: © 2026 Leo的博客. Built with React + TypeScript.
+      - generic [ref=e54]: 用代码丈量世界 🌍

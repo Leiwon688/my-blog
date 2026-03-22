@@ -1,0 +1,31 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "Leo的博客" [ref=e7] [cursor=pointer]:
+        - /url: "#/"
+      - navigation
+  - main [ref=e17]:
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - img [ref=e66]
+        - heading "管理员登录" [level=1] [ref=e68]
+        - paragraph [ref=e69]: Leo的博客后台
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - generic [ref=e72]: 账号
+          - textbox "请输入账号" [ref=e73]
+        - generic [ref=e74]:
+          - generic [ref=e75]: 密码
+          - generic [ref=e76]:
+            - textbox "请输入密码" [ref=e77]
+            - button "显示密码":
+              - img
+        - button "登录" [ref=e80] [cursor=pointer]
+      - paragraph [ref=e81]:
+        - text: 仅供博主使用，访客请
+        - link "返回首页 →" [ref=e82] [cursor=pointer]:
+          - /url: /
+  - contentinfo [ref=e51]:
+    - generic [ref=e52]:
+      - generic [ref=e53]: © 2026 Leo的博客. Built with React + TypeScript.
+      - generic [ref=e54]: 用代码丈量世界 🌍

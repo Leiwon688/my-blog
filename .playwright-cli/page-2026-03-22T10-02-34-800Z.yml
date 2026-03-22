@@ -1,0 +1,55 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "Leo的博客" [ref=e7] [cursor=pointer]:
+        - /url: "#/"
+      - navigation [ref=e8]:
+        - link "文章" [ref=e83] [cursor=pointer]:
+          - /url: "#/admin/posts"
+        - link "标签" [ref=e84] [cursor=pointer]:
+          - /url: "#/admin/tags"
+        - link "站点设置" [ref=e85] [cursor=pointer]:
+          - /url: "#/admin/profile"
+        - link "前台" [ref=e86] [cursor=pointer]:
+          - /url: "#/"
+          - img [ref=e87]
+          - text: 前台
+        - button "退出" [ref=e89] [cursor=pointer]:
+          - img [ref=e90]
+          - text: 退出
+  - main [ref=e17]:
+    - generic [ref=e92]:
+      - generic [ref=e93]:
+        - heading "文章管理" [level=1] [ref=e94]
+        - button "+ 新建文章" [ref=e95] [cursor=pointer]
+      - textbox "搜索文章..." [ref=e97]
+      - table [ref=e99]:
+        - rowgroup [ref=e100]:
+          - row "标题 标签 日期 操作" [ref=e101]:
+            - columnheader "标题" [ref=e102]
+            - columnheader "标签" [ref=e103]
+            - columnheader "日期" [ref=e104]
+            - columnheader "操作" [ref=e105]
+        - rowgroup [ref=e106]:
+          - row "2025年AI热潮：DeepSeek引领中国人工智能新纪元 AI DeepSeek 人工智能 趋势 2025-03-22" [ref=e107]:
+            - cell "2025年AI热潮：DeepSeek引领中国人工智能新纪元" [ref=e108]:
+              - generic [ref=e109]: 2025年AI热潮：DeepSeek引领中国人工智能新纪元
+            - cell "AI DeepSeek 人工智能 趋势" [ref=e110]:
+              - generic [ref=e111]:
+                - generic [ref=e112]: AI
+                - generic [ref=e113]: DeepSeek
+                - generic [ref=e114]: 人工智能
+                - generic [ref=e115]: 趋势
+            - cell "2025-03-22" [ref=e116]
+            - cell [ref=e117]:
+              - generic [ref=e118]:
+                - button "预览" [ref=e119] [cursor=pointer]:
+                  - img [ref=e120]
+                - button "编辑" [ref=e123] [cursor=pointer]:
+                  - img [ref=e124]
+                - button "删除" [ref=e126] [cursor=pointer]:
+                  - img [ref=e127]
+  - contentinfo [ref=e51]:
+    - generic [ref=e52]:
+      - generic [ref=e53]: © 2026 Leo的博客. Built with React + TypeScript.
+      - generic [ref=e54]: 用代码丈量世界 🌍

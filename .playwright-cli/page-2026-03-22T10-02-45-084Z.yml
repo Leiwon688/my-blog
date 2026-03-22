@@ -1,0 +1,47 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "Leo的博客" [ref=e7] [cursor=pointer]:
+        - /url: "#/"
+      - navigation [ref=e8]:
+        - link "文章" [ref=e83] [cursor=pointer]:
+          - /url: "#/admin/posts"
+        - link "标签" [ref=e84] [cursor=pointer]:
+          - /url: "#/admin/tags"
+        - link "站点设置" [active] [ref=e85] [cursor=pointer]:
+          - /url: "#/admin/profile"
+        - link "前台" [ref=e86] [cursor=pointer]:
+          - /url: "#/"
+          - img [ref=e87]
+          - text: 前台
+        - button "退出" [ref=e89] [cursor=pointer]:
+          - img [ref=e90]
+          - text: 退出
+  - main [ref=e17]:
+    - generic [ref=e129]:
+      - generic [ref=e130]:
+        - heading "站点设置" [level=1] [ref=e131]
+        - button "保存设置" [ref=e132] [cursor=pointer]
+      - generic [ref=e133]:
+        - button "基本信息" [ref=e134] [cursor=pointer]
+        - button "关于我" [ref=e135] [cursor=pointer]
+        - button "技能栈" [ref=e136] [cursor=pointer]
+        - button "社交链接" [ref=e137] [cursor=pointer]
+      - generic [ref=e138]:
+        - generic [ref=e139]:
+          - generic [ref=e140]: 站点标题
+          - textbox [ref=e141]: Leo的博客
+        - generic [ref=e142]:
+          - generic [ref=e143]: 首页问候语
+          - textbox [ref=e144]: 你好，我是 Leo 👋
+        - generic [ref=e145]:
+          - generic [ref=e146]: 首页简介
+          - textbox [ref=e147]: 记录技术探索与思考，专注于前端开发、系统架构和开发工具。
+        - generic [ref=e148]:
+          - generic [ref=e149]: 页脚文字
+          - textbox [ref=e150]: 用代码丈量世界 🌍
+      - paragraph [ref=e151]: "* 修改将同步保存到云端数据库。"
+  - contentinfo [ref=e51]:
+    - generic [ref=e52]:
+      - generic [ref=e53]: © 2026 Leo的博客. Built with React + TypeScript.
+      - generic [ref=e54]: 用代码丈量世界 🌍

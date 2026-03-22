@@ -1,0 +1,59 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "Leo的博客" [ref=e7] [cursor=pointer]:
+        - /url: "#/"
+      - navigation [ref=e8]:
+        - link "文章" [ref=e83] [cursor=pointer]:
+          - /url: "#/admin/posts"
+        - link "标签" [ref=e84] [cursor=pointer]:
+          - /url: "#/admin/tags"
+        - link "站点设置" [ref=e85] [cursor=pointer]:
+          - /url: "#/admin/profile"
+        - link "前台" [ref=e86] [cursor=pointer]:
+          - /url: "#/"
+          - img [ref=e87]
+          - text: 前台
+        - button "退出" [ref=e89] [cursor=pointer]:
+          - img [ref=e90]
+          - text: 退出
+  - main [ref=e17]:
+    - generic [ref=e129]:
+      - generic [ref=e130]:
+        - heading "站点设置" [level=1] [ref=e131]
+        - button "保存设置" [ref=e132] [cursor=pointer]
+      - generic [ref=e133]:
+        - button "基本信息" [ref=e134] [cursor=pointer]
+        - button "关于我" [ref=e135] [cursor=pointer]
+        - button "技能栈" [ref=e136] [cursor=pointer]
+        - button "社交链接" [ref=e137] [cursor=pointer]
+      - generic [ref=e187]:
+        - generic [ref=e188]:
+          - generic [ref=e189]: 显示名称
+          - textbox [ref=e190]: Leo Wang
+        - generic [ref=e191]:
+          - generic [ref=e192]: 一句话介绍
+          - textbox [ref=e193]: 软件工程师 · 开源爱好者 · 终身学习者
+        - generic [ref=e194]:
+          - generic [ref=e195]: 邮箱
+          - textbox [ref=e196]: leo@example.com
+        - generic [ref=e197]:
+          - generic [ref=e198]: 个人简介段落
+          - generic [ref=e199]:
+            - textbox [ref=e200]: 你好！我是 Leo，一名热爱技术的软件工程师。目前专注于前端工程化、全栈开发和系统架构设计。
+            - button [ref=e201] [cursor=pointer]:
+              - img [ref=e202]
+          - generic [ref=e205]:
+            - textbox [ref=e206]: 我相信写作是思维的延伸。这个博客是我记录技术探索、分享学习心得的地方。内容涵盖前端开发、后端架构、开发工具和一些碎碎念。
+            - button [ref=e207] [cursor=pointer]:
+              - img [ref=e208]
+          - generic [ref=e210]:
+            - textbox [ref=e211]
+            - button [ref=e212] [cursor=pointer]:
+              - img [ref=e213]
+          - button "+ 添加段落" [active] [ref=e204] [cursor=pointer]
+      - paragraph [ref=e151]: "* 修改将同步保存到云端数据库。"
+  - contentinfo [ref=e51]:
+    - generic [ref=e52]:
+      - generic [ref=e53]: © 2026 Leo的博客. Built with React + TypeScript.
+      - generic [ref=e54]: 用代码丈量世界 🌍

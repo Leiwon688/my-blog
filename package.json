@@ -67,6 +67,7 @@
   "devDependencies": {
     "@cloudbase/node-sdk": "^3.18.1",
     "@eslint/js": "^9.39.1",
+    "@playwright/cli": "^0.1.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
