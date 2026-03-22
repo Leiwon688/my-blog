@@ -19,7 +19,7 @@ import {
 } from '../lib/cloudbase';
 
 // 是否启用云端同步（本地和线上都用云端，只是集合名不同）
-const USE_CLOUD = true;
+const USE_CLOUD = false;
 
 // ============ 类型定义 ============
 
