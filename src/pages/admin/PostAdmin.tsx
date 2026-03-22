@@ -24,7 +24,10 @@ export function PostList() {
   );
 
   const handleDelete = async (id: string) => {
+    console.log('[PostAdmin] 删除文章, id:', id);
+    console.log('[PostAdmin] 当前文章列表:', posts.map(p => p.id + ':' + p.title));
     const updated = posts.filter(p => p.id !== id);
+    console.log('[PostAdmin] 删除后文章列表:', updated.map(p => p.id + ':' + p.title));
     await savePostsForAdmin(updated);
     refresh();
     setDeleteId(null);

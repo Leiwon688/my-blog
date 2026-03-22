@@ -105,9 +105,16 @@ export async function syncPostsToCloud(posts: CloudPost[]): Promise<boolean> {
   try {
     console.log('[CloudBase sync] 开始同步', posts.length, '篇文章');
     
+    // 获取云端现有文章
+    const existing = await db.collection(POSTS_COLLECTION).get();
+    console.log('[CloudBase sync] 云端现有文章:', existing.data.length, '篇');
+    console.log('[CloudBase sync] 云端文章ID列表:', existing.data.map(p => p.id));
+    
     // 对每篇文章使用 upsert 逻辑（存在则更新，不存在则新增）
     for (const post of posts) {
       const exist = await db.collection(POSTS_COLLECTION).where({ id: post.id }).get();
+      console.log('[CloudBase sync] 查询文章', post.id, '存在?:', exist.data?.length > 0);
+      
       if (exist.data && exist.data.length > 0) {
         console.log('[CloudBase sync] 更新文章:', post.id, post.title);
         await db.collection(POSTS_COLLECTION).where({ id: post.id }).update({
