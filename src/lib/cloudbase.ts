@@ -111,17 +111,23 @@ export async function syncPostsToCloud(posts: CloudPost[]): Promise<boolean> {
       console.log('[CloudBase sync] 删除文档 _id:', doc._id, 'title:', doc.title);
       await db.collection(POSTS_COLLECTION).doc(doc._id).remove();
     }
+    // 等待删除完成
+    await new Promise(resolve => setTimeout(resolve, 500));
     console.log('[CloudBase sync] 删除完成');
     
-    // 添加所有文章
-    for (const post of posts) {
+    // 添加所有文章（使用 Promise.all 确保所有写入完成）
+    const addPromises = posts.map(post => {
       console.log('[CloudBase sync] 添加文章:', post.id, post.title);
-      await db.collection(POSTS_COLLECTION).add({
+      return db.collection(POSTS_COLLECTION).add({
         ...post,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
-    }
+    });
+    await Promise.all(addPromises);
+    
+    // 等待写入完成
+    await new Promise(resolve => setTimeout(resolve, 1000));
     console.log('[CloudBase sync] 添加完成, 共', posts.length, '篇');
     
     // 验证
