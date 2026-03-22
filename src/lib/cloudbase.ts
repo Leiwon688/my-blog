@@ -139,21 +139,27 @@ export async function getTagsFromCloud(): Promise<string[]> {
 export async function saveTagsToCloud(tags: string[]): Promise<boolean> {
   try {
     const exist = await db.collection(TAGS_COLLECTION).get();
+    console.log('[CloudBase] 标签集合存在检查:', exist.data?.length, '条记录');
+    
     if (exist.data && exist.data.length > 0) {
-      await db.collection(TAGS_COLLECTION).where({ _id: exist.data[0]._id }).update({
+      console.log('[CloudBase] 更新标签文档, _id:', exist.data[0]._id);
+      const updateResult = await db.collection(TAGS_COLLECTION).where({ _id: exist.data[0]._id }).update({
         tags,
         updatedAt: Date.now(),
       });
+      console.log('[CloudBase] 更新结果:', JSON.stringify(updateResult));
     } else {
-      await db.collection(TAGS_COLLECTION).add({
+      console.log('[CloudBase] 创建新标签文档');
+      const addResult = await db.collection(TAGS_COLLECTION).add({
         tags,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
+      console.log('[CloudBase] 新增结果:', JSON.stringify(addResult));
     }
     return true;
-  } catch (e) {
-    console.error('Failed to save tags to cloud:', e);
+  } catch (e: any) {
+    console.error('[CloudBase] 保存标签失败:', e?.message || e);
     return false;
   }
 }
