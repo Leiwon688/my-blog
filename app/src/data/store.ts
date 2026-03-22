@@ -133,7 +133,7 @@ async function loadData(): Promise<DataFile> {
 
   // 降级到本地 JSON
   try {
-    const res = await fetch('/data.json');
+    const res = await fetch('/my-blog/data.json');
     cachedData = await res.json();
     return cachedData!;
   } catch (e) {
