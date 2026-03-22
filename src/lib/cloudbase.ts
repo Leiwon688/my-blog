@@ -104,19 +104,33 @@ export async function deletePostFromCloud(id: string): Promise<boolean> {
 export async function syncPostsToCloud(posts: CloudPost[]): Promise<boolean> {
   try {
     const existing = await db.collection(POSTS_COLLECTION).get();
+    console.log('[CloudBase sync] 云端现有文章:', existing.data?.length, '篇');
+    
+    // 先删除所有现有文章
     for (const doc of existing.data) {
+      console.log('[CloudBase sync] 删除文档 _id:', doc._id, 'title:', doc.title);
       await db.collection(POSTS_COLLECTION).doc(doc._id).remove();
     }
+    console.log('[CloudBase sync] 删除完成');
+    
+    // 添加所有文章
     for (const post of posts) {
+      console.log('[CloudBase sync] 添加文章:', post.id, post.title);
       await db.collection(POSTS_COLLECTION).add({
         ...post,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
     }
+    console.log('[CloudBase sync] 添加完成, 共', posts.length, '篇');
+    
+    // 验证
+    const verify = await db.collection(POSTS_COLLECTION).get();
+    console.log('[CloudBase sync] 验证云端文章数:', verify.data?.length);
+    
     return true;
-  } catch (e) {
-    console.error('Failed to sync posts to cloud:', e);
+  } catch (e: any) {
+    console.error('[CloudBase sync] 失败:', e?.message || e);
     return false;
   }
 }
