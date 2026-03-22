@@ -65,6 +65,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@cloudbase/node-sdk": "^3.18.1",
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
