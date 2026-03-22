@@ -112,27 +112,33 @@ export async function syncPostsToCloud(posts: CloudPost[]): Promise<boolean> {
       await db.collection(POSTS_COLLECTION).doc(doc._id).remove();
     }
     // 等待删除完成
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 800));
     console.log('[CloudBase sync] 删除完成');
     
-    // 添加所有文章（使用 Promise.all 确保所有写入完成）
-    const addPromises = posts.map(post => {
+    // 添加所有文章
+    for (const post of posts) {
       console.log('[CloudBase sync] 添加文章:', post.id, post.title);
-      return db.collection(POSTS_COLLECTION).add({
+      await db.collection(POSTS_COLLECTION).add({
         ...post,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
-    });
-    await Promise.all(addPromises);
+    }
     
-    // 等待写入完成
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // 等待写入完成 - CloudBase 需要更长时间
+    await new Promise(resolve => setTimeout(resolve, 2000));
     console.log('[CloudBase sync] 添加完成, 共', posts.length, '篇');
     
-    // 验证
-    const verify = await db.collection(POSTS_COLLECTION).get();
-    console.log('[CloudBase sync] 验证云端文章数:', verify.data?.length);
+    // 循环验证直到数据写入完成（最多 3 次）
+    let verify = await db.collection(POSTS_COLLECTION).get();
+    let attempts = 0;
+    while (verify.data.length < posts.length && attempts < 3) {
+      console.log('[CloudBase sync] 等待写入完成... 尝试', attempts + 1);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      verify = await db.collection(POSTS_COLLECTION).get();
+      attempts++;
+    }
+    console.log('[CloudBase sync] 验证云端文章数:', verify.data.length, '/', posts.length);
     
     return true;
   } catch (e: any) {
