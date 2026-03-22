@@ -1,0 +1,88 @@
+{
+  "profile": {
+    "siteTitle": "Leo的博客",
+    "heroName": "你好，我是 Leo 👋",
+    "heroBio": "记录技术探索与思考，专注于前端开发、系统架构和开发工具。",
+    "aboutName": "Leo Wang",
+    "aboutSubtitle": "软件工程师 · 开源爱好者 · 终身学习者",
+    "aboutParagraphs": [
+      "你好！我是 Leo，一名热爱技术的软件工程师。目前专注于前端工程化、全栈开发和系统架构设计。",
+      "我相信写作是思维的延伸。这个博客是我记录技术探索、分享学习心得的地方。内容涵盖前端开发、后端架构、开发工具和一些碎碎念。",
+      "工作之余，我喜欢为开源项目贡献代码、阅读计算机科学相关书籍，以及折腾各种效率工具。"
+    ],
+    "skills": [
+      { "category": "前端", "items": ["React", "TypeScript", "Vue", "Tailwind CSS", "Next.js"] },
+      { "category": "后端", "items": ["Go", "Node.js", "Python", "PostgreSQL", "Redis"] },
+      { "category": "工具", "items": ["Docker", "Git", "Linux", "CI/CD", "Kubernetes"] }
+    ],
+    "socialLinks": [
+      { "label": "GitHub", "href": "https://github.com", "type": "github" },
+      { "label": "RSS", "href": "#", "type": "rss" }
+    ],
+    "email": "leo@example.com",
+    "footerText": "用代码丈量世界 🌍"
+  },
+  "tags": ["React", "前端", "TypeScript", "性能优化", "随想", "成长", "CSS", "后端", "Go"],
+  "posts": [
+    {
+      "id": "1",
+      "title": "用 React 18 构建高性能 Web 应用",
+      "slug": "react-18-performance",
+      "date": "2026-03-15",
+      "tags": ["React", "前端", "性能优化"],
+      "readTime": 8,
+      "excerpt": "React 18 带来了并发特性、自动批处理、Suspense 改进等重要更新，本文深入探讨如何利用这些新特性打造流畅的用户体验。",
+      "content": "# 用 React 18 构建高性能 Web 应用\n\nReact 18 是 React 历史上最重要的版本之一，引入了**并发渲染（Concurrent Rendering）**这一革命性特性。\n\n## 并发特性\n\n并发模式允许 React 同时准备多个版本的 UI，使应用在处理大量数据时仍能保持响应。\n\n```tsx\nimport { startTransition, useTransition } from 'react';\n\nfunction SearchResults() {\n  const [isPending, startTransition] = useTransition();\n  const [query, setQuery] = useState('');\n  const [results, setResults] = useState([]);\n\n  const handleSearch = (value: string) => {\n    setQuery(value);\n    startTransition(() => {\n      setResults(heavySearch(value));\n    });\n  };\n\n  return (\n    <div>\n      <input onChange={e => handleSearch(e.target.value)} />\n      {isPending ? <Spinner /> : <ResultList data={results} />}\n    </div>\n  );\n}\n```\n\n## 自动批处理\n\nReact 18 中，所有状态更新都会自动批处理，包括在 setTimeout、Promise 和原生事件处理中。\n\n## 总结\n\nReact 18 的并发特性为构建高性能应用提供了强大工具。"
+    },
+    {
+      "id": "2",
+      "title": "TypeScript 类型体操完全指南",
+      "slug": "typescript-type-gymnastics",
+      "date": "2026-03-14",
+      "tags": ["TypeScript", "前端", "后端"],
+      "readTime": 12,
+      "excerpt": "TypeScript 的类型系统是其核心优势所在。本文将带你深入理解高级类型用法，包括条件类型、映射类型、模板字面量类型等。",
+      "content": "# TypeScript 类型体操完全指南\n\nTypeScript 的类型系统是其核心优势所在。\n\n## 条件类型\n\n```ts\ntype IsString<T> = T extends string ? true : false;\ntype A = IsString<string>;  // true\ntype B = IsString<number>;  // false\n```\n\n## 映射类型\n\n```ts\ntype Readonly<T> = {\n  readonly [P in keyof T]: T[P];\n};\n```\n\n## 总结\n\n掌握这些高级类型用法，可以让你的代码更加类型安全。"
+    },
+    {
+      "id": "3",
+      "title": "Tailwind CSS v4 带来的新变化",
+      "slug": "tailwind-v4-whats-new",
+      "date": "2026-03-13",
+      "tags": ["CSS", "前端", "工具"],
+      "readTime": 6,
+      "excerpt": "Tailwind CSS v4 引入了全新的引擎，性能大幅提升，同时带来了更简洁的配置方式和强大的新功能。",
+      "content": "# Tailwind CSS v4 带来的新变化\n\nv4 版本带来了全新的引擎架构。\n\n## 性能提升\n\n- 增量编译\n- 更好的缓存\n- 更快的构建速度\n\n## 新功能\n\n使用 CSS 原生特性，不再需要复杂的配置文件。"
+    },
+    {
+      "id": "4",
+      "title": "从零构建 RESTful API：Go 语言实战",
+      "slug": "go-rest-api",
+      "date": "2026-03-12",
+      "tags": ["Go", "后端", "架构"],
+      "readTime": 15,
+      "excerpt": "使用 Go 语言从零构建一个高性能 RESTful API，涵盖路由设计、中间件、数据库集成、认证等核心内容。",
+      "content": "# 从零构建 RESTful API：Go 语言实战\n\nGo 是构建高性能后端服务的理想选择。\n\n## 项目结构\n\n```\n/\n├── main.go\n├── handlers/\n├── models/\n└── middleware/\n```\n\n## 路由设计\n\n使用 Gorilla Mux 或标准库的 HTTP 处理。\n\n## 数据库\n\n集成 PostgreSQL，使用 GORM 或 sqlx。"
+    },
+    {
+      "id": "5",
+      "title": "现代 CSS 布局完全指南",
+      "slug": "modern-css-layout",
+      "date": "2026-03-11",
+      "tags": ["CSS", "前端"],
+      "readTime": 10,
+      "excerpt": "Grid、Flexbox、Subgrid... 带你全面掌握现代 CSS 布局技术，解决各种复杂的排版需求。",
+      "content": "# 现代 CSS 布局完全指南\n\n## Flexbox\n\nFlexbox 是一维布局模型，适合处理行或列。\n\n## Grid\n\nGrid 是二维布局模型，可以同时控制行和列。\n\n## Subgrid\n\nSubgrid 允许子元素继承父网格的轨道定义。"
+    },
+    {
+      "id": "6",
+      "title": "Docker 最佳实践与性能优化",
+      "slug": "docker-best-practices",
+      "date": "2026-03-10",
+      "tags": ["后端", "工具", "DevOps"],
+      "readTime": 11,
+      "excerpt": "Docker 已成为现代开发的标配，本文分享 Dockerfile 编写、多阶段构建、镜像优化等实战技巧。",
+      "content": "# Docker 最佳实践与性能优化\n\n## 多阶段构建\n\n使用多阶段构建可以大幅减小镜像体积。\n\n```dockerfile\nFROM node:18-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:18-alpine\nWORKDIR /app\nCOPY --from=builder /app/dist ./dist\n```\n\n## 最佳实践\n\n- 使用 .dockerignore\n- 最小化层数\n- 使用特定版本的基础镜像"
+    }
+  ]
+}
