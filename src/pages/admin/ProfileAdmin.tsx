@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getProfile, getProfileFromStorage, saveProfileToStorage, type SiteProfile } from '../../data/store';
+import { getProfile, saveProfileToStorage, type SiteProfile } from '../../data/store';
 
 export default function ProfileAdmin() {
   const [profile, setProfile] = useState<SiteProfile | null>(null);
@@ -8,14 +8,9 @@ export default function ProfileAdmin() {
 
   useEffect(() => {
     async function load() {
-      // 优先从 localStorage 读取
-      const stored = getProfileFromStorage();
-      if (stored) {
-        setProfile(stored);
-      } else {
-        const p = await getProfile();
-        setProfile(p);
-      }
+      // 优先从云端读取最新数据
+      const p = await getProfile();
+      setProfile(p);
     }
     load();
   }, []);
@@ -297,7 +292,7 @@ export default function ProfileAdmin() {
       )}
 
   <p className="mt-6 text-xs text-zinc-400">
-    * 修改将保存在浏览器本地存储中，预览时生效。如需永久保存，请导出 data.json 文件。
+    * 修改将同步保存到云端数据库。
   </p>
     </div>
   );

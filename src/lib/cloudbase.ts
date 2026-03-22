@@ -37,10 +37,11 @@ export async function ensureCloudbaseReady(): Promise<boolean> {
   return initialized;
 }
 
-// 集合名称
-const POSTS_COLLECTION = 'posts';
-const PROFILE_COLLECTION = 'profile';
-const TAGS_COLLECTION = 'tags';
+// 集合名称（本地开发用 _dev 后缀，线上用正式名称）
+const isDev = !import.meta.env.PROD;
+const POSTS_COLLECTION = isDev ? 'posts_dev' : 'posts';
+const PROFILE_COLLECTION = isDev ? 'profile_dev' : 'profile';
+const TAGS_COLLECTION = isDev ? 'tags_dev' : 'tags';
 
 // ============ 文章操作 ============
 

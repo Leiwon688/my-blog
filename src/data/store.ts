@@ -18,8 +18,8 @@ import {
   ensureCloudbaseReady
 } from '../lib/cloudbase';
 
-// 是否启用云端同步（仅在生产环境启用）
-const USE_CLOUD = import.meta.env.PROD;
+// 是否启用云端同步（本地和线上都用云端，只是集合名不同）
+const USE_CLOUD = true;
 
 // ============ 类型定义 ============
 
@@ -133,7 +133,7 @@ async function loadData(): Promise<DataFile> {
 
   // 降级到本地 JSON
   try {
-    const res = await fetch('/my-blog/data.json');
+    const res = await fetch('/data.json');
     cachedData = await res.json();
     return cachedData!;
   } catch (e) {
@@ -217,42 +217,67 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-// ============ 后台管理函数（更新 localStorage + 云端）============
-
-const PREVIEW_POSTS_KEY = 'leo_blog_posts_preview';
-const PREVIEW_TAGS_KEY = 'leo_blog_tags_preview';
-const PREVIEW_PROFILE_KEY = 'leo_blog_profile_preview';
+// ============ 后台管理函数（直接读写云端，保证数据一致性）============
 
 export async function getPostsForAdmin(): Promise<Post[]> {
-  const preview = localStorage.getItem(PREVIEW_POSTS_KEY);
-  if (preview) return JSON.parse(preview);
-  return getPosts();
+  // 直接从云端获取最新数据
+  if (USE_CLOUD) {
+    try {
+      await ensureCloudbaseReady();
+      const posts = await getPostsFromCloud();
+      if (posts.length > 0) {
+        return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      }
+    } catch (e) {
+      console.warn('Failed to get posts from cloud:', e);
+    }
+  }
+  // 降级到本地 JSON
+  const data = await loadData();
+  return data.posts;
 }
 
 export async function getTagsForAdmin(): Promise<string[]> {
-  const preview = localStorage.getItem(PREVIEW_TAGS_KEY);
-  if (preview) return JSON.parse(preview);
-  return getTags();
+  // 直接从云端获取最新数据
+  if (USE_CLOUD) {
+    try {
+      await ensureCloudbaseReady();
+      const tags = await getTagsFromCloud();
+      if (tags.length > 0) return tags;
+    } catch (e) {
+      console.warn('Failed to get tags from cloud:', e);
+    }
+  }
+  // 降级到本地 JSON
+  const data = await loadData();
+  return data.tags;
 }
 
-export function getProfileFromStorage(): SiteProfile | null {
-  const stored = localStorage.getItem(PREVIEW_PROFILE_KEY);
-  if (stored) return JSON.parse(stored);
-  return null;
+export async function getProfileFromStorage(): Promise<SiteProfile | null> {
+  // 直接从云端获取最新数据
+  if (USE_CLOUD) {
+    try {
+      await ensureCloudbaseReady();
+      const profile = await getProfileFromCloud();
+      if (profile) return profile;
+    } catch (e) {
+      console.warn('Failed to get profile from cloud:', e);
+    }
+  }
+  // 降级到本地 JSON
+  const data = await loadData();
+  return data.profile;
 }
 
 export async function saveProfileToStorage(profile: SiteProfile): Promise<void> {
-  localStorage.setItem(PREVIEW_PROFILE_KEY, JSON.stringify(profile));
   if (USE_CLOUD) await saveProfileToCloud(profile);
 }
 
 export async function savePostsForAdmin(posts: Post[]): Promise<void> {
-  localStorage.setItem(PREVIEW_POSTS_KEY, JSON.stringify(posts));
   if (USE_CLOUD) await syncPostsToCloud(posts);
 }
 
 export async function saveTagsForAdmin(tags: string[]): Promise<void> {
-  localStorage.setItem(PREVIEW_TAGS_KEY, JSON.stringify(tags));
   if (USE_CLOUD) await saveTagsToCloud(tags);
 }
 
