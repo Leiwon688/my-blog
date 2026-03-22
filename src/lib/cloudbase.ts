@@ -206,12 +206,16 @@ export async function getProfileFromCloud(): Promise<SiteProfile | null> {
 export async function saveProfileToCloud(profile: SiteProfile): Promise<boolean> {
   try {
     const exist = await db.collection(PROFILE_COLLECTION).get();
+    console.log('[CloudBase] profile 查询结果:', exist.data?.length, '条');
+    
     if (exist.data && exist.data.length > 0) {
+      console.log('[CloudBase] 更新 profile, _id:', exist.data[0]._id);
       await db.collection(PROFILE_COLLECTION).where({ _id: exist.data[0]._id }).update({
         ...profile,
         updatedAt: Date.now(),
       });
     } else {
+      console.log('[CloudBase] 新增 profile 文档');
       await db.collection(PROFILE_COLLECTION).add({
         ...profile,
         createdAt: Date.now(),
