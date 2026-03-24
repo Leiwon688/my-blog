@@ -61,9 +61,14 @@ export interface CloudPost {
 
 export async function getPostsFromCloud(): Promise<CloudPost[]> {
   try {
-    const res = await db.collection(POSTS_COLLECTION).orderBy('date', 'desc').get();
+    // 不用 orderBy，避免索引问题；拿到数据后在内存排序
+    const res = await db.collection(POSTS_COLLECTION).get();
     console.log('[CloudBase] 读取文章:', POSTS_COLLECTION, '数量:', res.data?.length || 0);
-    return res.data;
+    // 按日期降序排序
+    const sorted = (res.data || []).sort((a: any, b: any) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+    return sorted;
   } catch (e) {
     console.error('[CloudBase] 读取文章失败:', e);
     return [];
