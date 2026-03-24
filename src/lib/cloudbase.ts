@@ -62,9 +62,10 @@ export interface CloudPost {
 export async function getPostsFromCloud(): Promise<CloudPost[]> {
   try {
     const res = await db.collection(POSTS_COLLECTION).orderBy('date', 'desc').get();
+    console.log('[CloudBase] 读取文章:', POSTS_COLLECTION, '数量:', res.data?.length || 0);
     return res.data;
   } catch (e) {
-    console.error('Failed to fetch posts from cloud:', e);
+    console.error('[CloudBase] 读取文章失败:', e);
     return [];
   }
 }
