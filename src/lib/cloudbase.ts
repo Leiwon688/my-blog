@@ -157,10 +157,11 @@ export async function getTagsFromCloud(): Promise<string[]> {
 
 export async function saveTagsToCloud(tags: string[]): Promise<boolean> {
   try {
-    const exist = await db.collection(TAGS_COLLECTION).get();
+    const exist = await db.collection(TAGS_COLLECTION).limit(1).get();
     
     if (exist.data && exist.data.length > 0) {
-      await db.collection(TAGS_COLLECTION).where({ _id: exist.data[0]._id }).update({
+      // 用 doc(docId).update() —— 正确写法
+      await db.collection(TAGS_COLLECTION).doc(exist.data[0]._id).update({
         tags,
         updatedAt: Date.now(),
       });
@@ -182,12 +183,10 @@ export async function saveTagsToCloud(tags: string[]): Promise<boolean> {
 
 export async function getProfileFromCloud(): Promise<SiteProfile | null> {
   try {
-    const res = await db.collection(PROFILE_COLLECTION).get();
-    if (res.code === 'DATABASE_COLLECTION_NOT_EXIST') {
-      return null;
-    }
+    const res = await db.collection(PROFILE_COLLECTION).limit(1).get();
     if (res.data && res.data.length > 0) {
-      const { _id, _openid, ...profile } = res.data[0];
+      // 剔除云端内部字段，只保留业务字段
+      const { _id, _openid, createdAt, updatedAt, ...profile } = res.data[0];
       const safeProfile: SiteProfile = {
         ...profile,
         aboutParagraphs: profile.aboutParagraphs || [],
@@ -205,19 +204,20 @@ export async function getProfileFromCloud(): Promise<SiteProfile | null> {
 
 export async function saveProfileToCloud(profile: SiteProfile): Promise<boolean> {
   try {
-    const exist = await db.collection(PROFILE_COLLECTION).get();
-    console.log('[CloudBase] profile 查询结果:', exist.data?.length, '条');
-    
+    // 确保 profile 对象中没有 _id 等内部字段
+    const { _id, _openid, createdAt, updatedAt, ...cleanProfile } = profile as any;
+
+    const exist = await db.collection(PROFILE_COLLECTION).limit(1).get();
+
     if (exist.data && exist.data.length > 0) {
-      console.log('[CloudBase] 更新 profile, _id:', exist.data[0]._id);
-      await db.collection(PROFILE_COLLECTION).where({ _id: exist.data[0]._id }).update({
-        ...profile,
+      // 用 doc(docId).update() —— 这是 CloudBase 更新单条文档的正确写法
+      await db.collection(PROFILE_COLLECTION).doc(exist.data[0]._id).update({
+        ...cleanProfile,
         updatedAt: Date.now(),
       });
     } else {
-      console.log('[CloudBase] 新增 profile 文档');
       await db.collection(PROFILE_COLLECTION).add({
-        ...profile,
+        ...cleanProfile,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
