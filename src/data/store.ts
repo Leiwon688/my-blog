@@ -1,8 +1,7 @@
 /**
  * 博客数据存储
- * - 生产环境：优先从云数据库获取（腾讯云开发 CloudBase）
- * - 开发环境：使用本地 data.json
- * - 写操作会同步到云端
+ * - 所有读写均走 CloudBase 云数据库
+ * - 云端失败时降级到本地 data.json（仅作兜底，posts 为空）
  */
 
 // ============ 云数据库配置 ============
@@ -17,9 +16,6 @@ import {
   saveProfileToCloud,
   ensureCloudbaseReady
 } from '../lib/cloudbase';
-
-// 是否启用云端同步（本地和线上都用云端，只是集合名不同）
-const USE_CLOUD = true;
 
 // ============ 类型定义 ============
 
@@ -58,16 +54,7 @@ export interface SiteProfile {
   footerText: string;
 }
 
-// ============ 数据加载 ============
-
-interface DataFile {
-  profile: SiteProfile;
-  tags: string[];
-  posts: Post[];
-}
-
-let cachedData: DataFile | null = null;
-let cloudDataLoaded = false;
+// ============ 默认值 ============
 
 function getDefaultProfile(): SiteProfile {
   return {
@@ -84,84 +71,29 @@ function getDefaultProfile(): SiteProfile {
   };
 }
 
-// 尝试从云端加载数据
-async function loadCloudData(): Promise<{ posts: Post[], tags: string[], profile: SiteProfile } | null> {
-  if (!USE_CLOUD) return null;
+// ============ 通用云端初始化 ============
 
-  const ready = await ensureCloudbaseReady();
-  if (!ready) {
-    console.warn('CloudBase not ready, falling back to local data');
-    return null;
-  }
-
+async function withCloud<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   try {
-    const [posts, tags, cloudProfile] = await Promise.all([
-      getPostsFromCloud(),
-      getTagsFromCloud(),
-      getProfileFromCloud()
-    ]);
-    if (posts.length > 0 || cloudProfile) {
-      return {
-        posts,
-        tags,
-        profile: cloudProfile || getDefaultProfile()
-      };
+    const ready = await ensureCloudbaseReady();
+    if (!ready) {
+      console.warn('[Store] CloudBase 未就绪，使用降级数据');
+      return fallback;
     }
+    return await fn();
   } catch (e) {
-    console.error('Failed to load from cloud:', e);
-  }
-  return null;
-}
-
-async function loadData(): Promise<DataFile> {
-  if (cachedData) return cachedData;
-
-  // 优先尝试从云端加载
-  if (!cloudDataLoaded) {
-    const cloudData = await loadCloudData();
-    if (cloudData) {
-      cachedData = {
-        profile: cloudData.profile,
-        tags: cloudData.tags,
-        posts: cloudData.posts
-      };
-      cloudDataLoaded = true;
-      return cachedData!;
-    }
-    cloudDataLoaded = true;
-  }
-
-  // 降级到本地 JSON
-  try {
-    const res = await fetch('/my-blog/data.json');
-    cachedData = await res.json();
-    return cachedData!;
-  } catch (e) {
-    console.error('Failed to load data:', e);
-    return {
-      profile: getDefaultProfile(),
-      tags: [],
-      posts: []
-    };
+    console.error('[Store] 云端请求失败:', e);
+    return fallback;
   }
 }
 
-// ============ 导出函数（前台使用，优先从云端获取最新数据）============
+// ============ 前台读取函数 ============
 
 export async function getPosts(): Promise<Post[]> {
-  if (USE_CLOUD) {
-    try {
-      await ensureCloudbaseReady();
-      const posts = await getPostsFromCloud();
-      if (posts.length > 0) {
-        return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      }
-    } catch (e) {
-      console.warn('Failed to get posts from cloud:', e);
-    }
-  }
-  const data = await loadData();
-  return data.posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return withCloud(async () => {
+    const posts = await getPostsFromCloud();
+    return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, []);
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
@@ -175,17 +107,7 @@ export async function getPostById(id: string): Promise<Post | undefined> {
 }
 
 export async function getTags(): Promise<string[]> {
-  if (USE_CLOUD) {
-    try {
-      await ensureCloudbaseReady();
-      const tags = await getTagsFromCloud();
-      if (tags.length > 0) return tags;
-    } catch (e) {
-      console.warn('Failed to get tags from cloud:', e);
-    }
-  }
-  const data = await loadData();
-  return data.tags;
+  return withCloud(() => getTagsFromCloud(), []);
 }
 
 export async function getPostsByTag(tag: string): Promise<Post[]> {
@@ -194,20 +116,14 @@ export async function getPostsByTag(tag: string): Promise<Post[]> {
 }
 
 export async function getProfile(): Promise<SiteProfile> {
-  if (USE_CLOUD) {
-    try {
-      await ensureCloudbaseReady();
-      const cloudProfile = await getProfileFromCloud();
-      if (cloudProfile) return cloudProfile;
-    } catch (e) {
-      console.warn('Failed to get profile from cloud:', e);
-    }
-  }
-  const data = await loadData();
-  return data.profile;
+  return withCloud(async () => {
+    const profile = await getProfileFromCloud();
+    return profile || getDefaultProfile();
+  }, getDefaultProfile());
 }
 
-// 工具函数
+// ============ 工具函数 ============
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -217,76 +133,42 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-// ============ 后台管理函数（直接读写云端，保证数据一致性）============
+// ============ 后台管理函数 ============
 
 export async function getPostsForAdmin(): Promise<Post[]> {
-  // 直接从云端获取最新数据
-  if (USE_CLOUD) {
-    try {
-      await ensureCloudbaseReady();
-      const posts = await getPostsFromCloud();
-      if (posts.length > 0) {
-        return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      }
-    } catch (e) {
-      console.warn('Failed to get posts from cloud:', e);
-    }
-  }
-  // 降级到本地 JSON
-  const data = await loadData();
-  return data.posts;
+  return withCloud(async () => {
+    const posts = await getPostsFromCloud();
+    return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, []);
 }
 
 export async function getTagsForAdmin(): Promise<string[]> {
-  // 直接从云端获取最新数据
-  if (USE_CLOUD) {
-    try {
-      await ensureCloudbaseReady();
-      const tags = await getTagsFromCloud();
-      if (tags.length > 0) return tags;
-    } catch (e) {
-      console.warn('Failed to get tags from cloud:', e);
-    }
-  }
-  // 降级到本地 JSON
-  const data = await loadData();
-  return data.tags;
+  return withCloud(() => getTagsFromCloud(), []);
 }
 
 export async function getProfileFromStorage(): Promise<SiteProfile | null> {
-  // 直接从云端获取最新数据
-  if (USE_CLOUD) {
-    try {
-      await ensureCloudbaseReady();
-      const profile = await getProfileFromCloud();
-      if (profile) return profile;
-    } catch (e) {
-      console.warn('Failed to get profile from cloud:', e);
-    }
-  }
-  // 降级到本地 JSON
-  const data = await loadData();
-  return data.profile;
+  return withCloud(async () => {
+    const profile = await getProfileFromCloud();
+    return profile;
+  }, null);
 }
 
 export async function saveProfileToStorage(profile: SiteProfile): Promise<void> {
-  if (USE_CLOUD) await saveProfileToCloud(profile);
+  await withCloud(() => saveProfileToCloud(profile), false);
 }
 
 export async function savePostsForAdmin(posts: Post[]): Promise<void> {
-  if (USE_CLOUD) await syncPostsToCloud(posts);
+  await withCloud(() => syncPostsToCloud(posts), false);
 }
 
 export async function saveTagsForAdmin(tags: string[]): Promise<void> {
-  if (USE_CLOUD) await saveTagsToCloud(tags);
+  await withCloud(() => saveTagsToCloud(tags), false);
 }
 
 export async function savePostToCloudRealtime(post: Post): Promise<boolean> {
-  if (!USE_CLOUD) return false;
-  return savePostToCloud(post as any);
+  return withCloud(() => savePostToCloud(post as any), false);
 }
 
 export async function deletePostRealtime(id: string): Promise<boolean> {
-  if (!USE_CLOUD) return false;
-  return deletePostFromCloud(id);
+  return withCloud(() => deletePostFromCloud(id), false);
 }
