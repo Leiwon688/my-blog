@@ -57,6 +57,12 @@ const POSTS_COLLECTION = isDev ? 'posts_dev' : 'posts';
 const PROFILE_COLLECTION = isDev ? 'profile_dev' : 'profile';
 const TAGS_COLLECTION = isDev ? 'tags_dev' : 'tags';
 
+// 线上唯一文档 ID（固定，防止重复新增）
+// profile 文档: f0df711e69bf9da40121095764b3efb9
+// tags   文档: 93abbbd769c291ba016bd9e14f1e5236
+const PROFILE_DOC_ID = 'f0df711e69bf9da40121095764b3efb9';
+const TAGS_DOC_ID = '93abbbd769c291ba016bd9e14f1e5236';
+
 // ============ 文章操作 ============
 
 export interface CloudPost {
@@ -164,11 +170,15 @@ export async function syncPostsToCloud(posts: CloudPost[]): Promise<boolean> {
 
 export async function getTagsFromCloud(): Promise<string[]> {
   try {
-    const res = await db.collection(TAGS_COLLECTION).get();
-    if (res.data && res.data.length > 0) {
-      return res.data[0].tags || [];
+    let raw: any = null;
+    if (isDev) {
+      const res = await db.collection(TAGS_COLLECTION).limit(1).get();
+      raw = res.data?.[0];
+    } else {
+      const res = await db.collection(TAGS_COLLECTION).doc(TAGS_DOC_ID).get();
+      raw = Array.isArray(res.data) ? res.data[0] : res.data;
     }
-    return [];
+    return raw?.tags || [];
   } catch (e) {
     console.error('Failed to fetch tags from cloud:', e);
     return [];
@@ -177,18 +187,18 @@ export async function getTagsFromCloud(): Promise<string[]> {
 
 export async function saveTagsToCloud(tags: string[]): Promise<boolean> {
   try {
-    const exist = await db.collection(TAGS_COLLECTION).limit(1).get();
-    
-    if (exist.data && exist.data.length > 0) {
-      // 用 doc(docId).update() —— 正确写法
-      await db.collection(TAGS_COLLECTION).doc(exist.data[0]._id).update({
-        tags,
-        updatedAt: Date.now(),
-      });
+    if (isDev) {
+      // 开发环境：走动态查询
+      const exist = await db.collection(TAGS_COLLECTION).limit(1).get();
+      if (exist.data && exist.data.length > 0) {
+        await db.collection(TAGS_COLLECTION).doc(exist.data[0]._id).update({ tags, updatedAt: Date.now() });
+      } else {
+        await db.collection(TAGS_COLLECTION).add({ tags, createdAt: Date.now(), updatedAt: Date.now() });
+      }
     } else {
-      await db.collection(TAGS_COLLECTION).add({
+      // 线上环境：直接更新固定文档，永远不会新增
+      await db.collection(TAGS_COLLECTION).doc(TAGS_DOC_ID).update({
         tags,
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       });
     }
@@ -203,19 +213,22 @@ export async function saveTagsToCloud(tags: string[]): Promise<boolean> {
 
 export async function getProfileFromCloud(): Promise<SiteProfile | null> {
   try {
-    const res = await db.collection(PROFILE_COLLECTION).limit(1).get();
-    if (res.data && res.data.length > 0) {
-      // 剔除云端内部字段，只保留业务字段
-      const { _id, _openid, createdAt, updatedAt, ...profile } = res.data[0];
-      const safeProfile: SiteProfile = {
-        ...profile,
-        aboutParagraphs: profile.aboutParagraphs || [],
-        skills: profile.skills || [],
-        socialLinks: profile.socialLinks || [],
-      } as SiteProfile;
-      return safeProfile;
+    let raw: any = null;
+    if (isDev) {
+      const res = await db.collection(PROFILE_COLLECTION).limit(1).get();
+      raw = res.data?.[0];
+    } else {
+      const res = await db.collection(PROFILE_COLLECTION).doc(PROFILE_DOC_ID).get();
+      raw = Array.isArray(res.data) ? res.data[0] : res.data;
     }
-    return null;
+    if (!raw) return null;
+    const { _id, _openid, createdAt, updatedAt, ...profile } = raw;
+    return {
+      ...profile,
+      aboutParagraphs: profile.aboutParagraphs || [],
+      skills: profile.skills || [],
+      socialLinks: profile.socialLinks || [],
+    } as SiteProfile;
   } catch (e) {
     console.error('Failed to fetch profile from cloud:', e);
     return null;
@@ -224,21 +237,20 @@ export async function getProfileFromCloud(): Promise<SiteProfile | null> {
 
 export async function saveProfileToCloud(profile: SiteProfile): Promise<boolean> {
   try {
-    // 确保 profile 对象中没有 _id 等内部字段
     const { _id, _openid, createdAt, updatedAt, ...cleanProfile } = profile as any;
 
-    const exist = await db.collection(PROFILE_COLLECTION).limit(1).get();
-
-    if (exist.data && exist.data.length > 0) {
-      // 用 doc(docId).update() —— 这是 CloudBase 更新单条文档的正确写法
-      await db.collection(PROFILE_COLLECTION).doc(exist.data[0]._id).update({
-        ...cleanProfile,
-        updatedAt: Date.now(),
-      });
+    if (isDev) {
+      // 开发环境：走动态查询
+      const exist = await db.collection(PROFILE_COLLECTION).limit(1).get();
+      if (exist.data && exist.data.length > 0) {
+        await db.collection(PROFILE_COLLECTION).doc(exist.data[0]._id).update({ ...cleanProfile, updatedAt: Date.now() });
+      } else {
+        await db.collection(PROFILE_COLLECTION).add({ ...cleanProfile, createdAt: Date.now(), updatedAt: Date.now() });
+      }
     } else {
-      await db.collection(PROFILE_COLLECTION).add({
+      // 线上环境：直接更新固定文档，永远不会新增
+      await db.collection(PROFILE_COLLECTION).doc(PROFILE_DOC_ID).update({
         ...cleanProfile,
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       });
     }
