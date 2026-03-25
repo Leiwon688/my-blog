@@ -15,26 +15,34 @@ const app = cloudbase.init({
 
 const db = app.database();
 
-// 匿名登录
-export async function initCloudbase(): Promise<boolean> {
-  try {
-    await app.auth({ persistence: 'local' }).anonymousAuthProvider().signIn();
-    return true;
-  } catch (e) {
-    try {
-      const authState = await (app.auth() as any).getAuthState();
-      if (authState) return true;
-    } catch {}
-    console.error('CloudBase auth failed:', e);
-    return false;
-  }
-}
-
+/**
+ * 确保 CloudBase 就绪
+ * 使用匿名登录，persistence 改为 'none'（不持久化）
+ * 这样每个浏览器都会得到相同的匿名身份行为
+ * 
+ * ⚠️  重要：CloudBase 控制台需要将 posts/profile/tags 集合的权限设置为：
+ *    "所有人可读，仅创建者可写" 或自定义规则允许所有人读
+ */
 let initialized = false;
+let initPromise: Promise<boolean> | null = null;
+
 export async function ensureCloudbaseReady(): Promise<boolean> {
   if (initialized) return true;
-  initialized = await initCloudbase();
-  return initialized;
+  // 防止并发多次初始化
+  if (!initPromise) {
+    initPromise = (async () => {
+      try {
+        await app.auth({ persistence: 'none' }).anonymousAuthProvider().signIn();
+        initialized = true;
+        return true;
+      } catch (e) {
+        console.error('[CloudBase] 登录失败:', e);
+        initPromise = null;
+        return false;
+      }
+    })();
+  }
+  return initPromise;
 }
 
 // 集合名称（本地开发用 _dev 后缀，线上用正式名称）
