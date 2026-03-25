@@ -16,23 +16,29 @@ const app = cloudbase.init({
 const db = app.database();
 
 /**
- * 确保 CloudBase 就绪
- * 使用匿名登录，persistence 改为 'none'（不持久化）
- * 这样每个浏览器都会得到相同的匿名身份行为
- * 
- * ⚠️  重要：CloudBase 控制台需要将 posts/profile/tags 集合的权限设置为：
- *    "所有人可读，仅创建者可写" 或自定义规则允许所有人读
+ * CloudBase 匿名登录
+ * persistence: 'local' — 登录态存 localStorage，同一浏览器复用同一身份
+ *
+ * ⚠️ 数据库安全规则需设置为允许所有人读：
+ *   {
+ *     "read": true,
+ *     "write": true
+ *   }
  */
 let initialized = false;
 let initPromise: Promise<boolean> | null = null;
 
 export async function ensureCloudbaseReady(): Promise<boolean> {
   if (initialized) return true;
-  // 防止并发多次初始化
   if (!initPromise) {
     initPromise = (async () => {
       try {
-        await app.auth({ persistence: 'none' }).anonymousAuthProvider().signIn();
+        const auth = app.auth({ persistence: 'local' });
+        // 已有登录态则直接复用，否则重新匿名登录
+        const loginState = await auth.getLoginState();
+        if (!loginState) {
+          await auth.anonymousAuthProvider().signIn();
+        }
         initialized = true;
         return true;
       } catch (e) {
